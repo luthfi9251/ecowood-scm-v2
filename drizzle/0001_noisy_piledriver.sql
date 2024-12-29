@@ -1,0 +1,1 @@
+ALTER TABLE `companies` MODIFY COLUMN `user_id` varchar(255) NOT NULL;
