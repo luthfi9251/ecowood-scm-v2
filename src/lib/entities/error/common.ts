@@ -10,6 +10,18 @@ export class AuthenticationError extends Error {
    }
 }
 
+export class AuthorizationError extends Error {
+   constructor(message: string, options?: ErrorOptions) {
+      super(message, options);
+   }
+}
+
+export class DataRetrievalError extends Error {
+   constructor(message: string, options?: ErrorOptions) {
+      super(message, options);
+   }
+}
+
 export class InputParsedError extends Error {
    fields: Record<string, string> | null;
 

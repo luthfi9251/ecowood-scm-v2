@@ -1,4 +1,5 @@
 import { db } from '@/db';
+import { company } from '@/db/schema/company';
 import { Session, session } from '@/db/schema/session';
 import { users } from '@/db/schema/user';
 import { eq } from 'drizzle-orm';
@@ -10,7 +11,14 @@ export class SessionRepository {
 
    async findSessionById(sessionId: string) {
       return db
-         .select({ user: users, session: session })
+         .select({
+            user: {
+               id: users.id,
+               email: users.email,
+               is_verified: users.is_verified,
+            },
+            session: session,
+         })
          .from(session)
          .innerJoin(users, eq(session.userId, users.id))
          .where(eq(session.id, sessionId));

@@ -7,6 +7,7 @@ import { sha256 } from '@oslojs/crypto/sha2';
 import { SessionRepository } from '../repository/session.repository';
 import { User } from '../entities/models/user';
 import { AuthenticationError } from '../entities/error/common';
+import { SessionValidationResult } from '../entities/models/session';
 
 const sessionRepository = new SessionRepository();
 
@@ -63,7 +64,3 @@ export class AuthService {
       await sessionRepository.deleteSession(sessionId);
    }
 }
-
-export type SessionValidationResult =
-   | { session: Session; user: User }
-   | { session: null; user: null };

@@ -23,4 +23,14 @@ export class UserRepository {
    async findByEmail(email: string) {
       return db.select().from(users).where(eq(users.email, email));
    }
+   async findById(userId: string) {
+      return db
+         .select({
+            id: users.id,
+            email: users.email,
+            is_verified: users.is_verified,
+         })
+         .from(users)
+         .where(eq(users.id, userId));
+   }
 }

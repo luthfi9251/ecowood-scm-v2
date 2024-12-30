@@ -30,4 +30,7 @@ export class CompanyRepository {
          .from(company)
          .where(eq(company.company_name, companyName));
    }
+   async findByUserId(userId: string) {
+      return db.select().from(company).where(eq(company.user_id, userId));
+   }
 }

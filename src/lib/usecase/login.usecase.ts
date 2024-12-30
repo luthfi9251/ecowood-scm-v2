@@ -10,7 +10,10 @@ export class LoginUseCase {
       private authService: AuthService
    ) {}
 
-   async execute(email: string, password: string): Promise<Session> {
+   async execute(
+      email: string,
+      password: string
+   ): Promise<{ session: Session; token: string }> {
       const [user] = await this.userRepository.findByEmail(email);
       if (!user) {
          throw new AuthenticationError('Invalid credentials');
@@ -22,6 +25,7 @@ export class LoginUseCase {
       }
 
       let token = this.authService.generateSessionToken();
-      return this.authService.createSession(token, user.id);
+      let session = await this.authService.createSession(token, user.id);
+      return { session, token };
    }
 }

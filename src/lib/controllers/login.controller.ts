@@ -23,10 +23,10 @@ export const loginController = async (email: string, password: string) => {
       );
    }
 
-   let validate = await loginUseCase.execute(
+   let sessionData = await loginUseCase.execute(
       credentialParsed.data.email,
       credentialParsed.data.password
    );
 
-   return validate;
+   return sessionData;
 };

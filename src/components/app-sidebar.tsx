@@ -36,6 +36,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import EcowoodLogo from '@/assets/ecowood-logo.svg';
 import { Spacer } from '@nextui-org/spacer';
+import { Session } from '@/db/schema/session';
+import { User } from '@/lib/entities/models/user';
+import { Company } from '@/lib/entities/models/company';
 
 // This is sample data.
 const data = {
@@ -218,7 +221,24 @@ const SidebarLogo = () => {
    );
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+   company?: Company;
+   user?: {
+      id: string;
+      email: string;
+      is_verified: boolean | null;
+   };
+}
+
+export function AppSidebar({ user, company, ...props }: AppSidebarProps) {
+   const dataUser = React.useMemo(() => {
+      return {
+         name: company?.company_name ?? '-',
+         email: user?.email ?? '-',
+         avatar: '/avatars/shadcn.jpg',
+      };
+   }, []);
+
    return (
       <Sidebar collapsible="icon" {...props}>
          <SidebarHeader>
@@ -231,7 +251,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <NavUtility utilities={navUtilityData} />
          </SidebarContent>
          <SidebarFooter>
-            <NavUser user={data.user} />
+            <NavUser user={dataUser} />
          </SidebarFooter>
          <SidebarRail />
       </Sidebar>

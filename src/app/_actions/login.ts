@@ -13,14 +13,14 @@ export const loginUser = async (formData: FormData) => {
    try {
       const cookieStore = await cookies();
       const data = Object.fromEntries(formData.entries());
-      let sessionData = await loginController(
+      let { session, token } = await loginController(
          data.email as string,
          data.password as string
       );
 
-      cookieStore.set('sessionId', sessionData.id, {
+      cookieStore.set('sessionId', token, {
          httpOnly: true,
-         expires: sessionData.expiresAt,
+         expires: session.expiresAt,
       });
       redirect(HREF_LINK.HILIR.DASHBOARD);
       return { success: true, error: {} };
