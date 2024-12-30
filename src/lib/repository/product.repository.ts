@@ -11,6 +11,8 @@ export class ProductRepository {
          product_picture: productData.product_picture,
          description: productData.description,
          company_id: companyId,
+         additional_info: productData.additional_info,
+         additional_docs: productData.additional_docs,
       });
    }
 }

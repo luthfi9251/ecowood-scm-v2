@@ -13,6 +13,7 @@ export const productTable = mysqlCore.mysqlTable('product', {
       .varchar('company_id', { length: 255 })
       .notNull()
       .references(() => company.id),
-
+   additional_info: mysqlCore.text().default('{}'),
+   additional_docs: mysqlCore.text().default('{}'),
    ...timestamps,
 });

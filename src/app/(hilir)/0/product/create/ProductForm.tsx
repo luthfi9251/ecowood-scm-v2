@@ -1,6 +1,7 @@
 'use client';
 
 import { createProduct } from '@/app/_actions/product';
+import { InputParsedError } from '@/lib/entities/error/common';
 import { Button } from '@nextui-org/button';
 import { Form } from '@nextui-org/form';
 import { Input, Textarea } from '@nextui-org/input';
@@ -39,7 +40,7 @@ const ProductCoreInformation = () => {
             placeholder=" "
          />
          <Input
-            name="picture"
+            name="product_picture"
             label="Product Picture"
             labelPlacement="outside"
             variant="bordered"
@@ -96,7 +97,7 @@ const ProductAdditionalInformation = ({
                         isRequired
                         label="Name"
                         labelPlacement="outside"
-                        name="value"
+                        name={mode + '-key-' + index}
                         placeholder=" "
                         type="text"
                         variant="bordered"
@@ -107,7 +108,7 @@ const ProductAdditionalInformation = ({
                         isRequired
                         label={mode == 'text' ? 'Value' : 'Document'}
                         labelPlacement="outside"
-                        name="value"
+                        name={mode + '-value-' + index}
                         type={mode == 'text' ? 'text' : 'file'}
                         placeholder=" "
                         variant="bordered"
@@ -134,17 +135,26 @@ const ProductAdditionalInformation = ({
 };
 
 export default function ProductForm() {
+   const [errors, setErrors] = useState({});
+   const [isPending, setIsPending] = useState(false);
    const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
+      setIsPending(true);
       const data = new FormData(e.currentTarget);
       const res = await createProduct(data);
+      if (!res.success) {
+         if (res.error.name === InputParsedError.name) {
+            setErrors(res.error.data!);
+         }
+      }
+      setIsPending(false);
    };
 
    return (
       <Form
          className="grid gap-2"
          onSubmit={submitHandler}
-         // validationErrors={errors}
+         validationErrors={errors}
       >
          <ProductCoreInformation />
          <ProductAdditionalInformation title="Additional Information" />
@@ -154,6 +164,7 @@ export default function ProductForm() {
          />
          <Spacer />
          <Button
+            isLoading={isPending}
             type="submit"
             className="bg-ecowood-secondary w-[200px] mx-auto text-white"
          >

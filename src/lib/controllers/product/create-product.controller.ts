@@ -20,7 +20,9 @@ const createProductUseCase = new CreateProductUseCase(
 
 export const createProductController = async (
    productData: ProductCreate,
-   session: Session
+   session: Session,
+   additionalProductInfo?: Record<string, string>[],
+   additionalProductDocs?: Record<string, string>[]
 ) => {
    if (!session) {
       throw new AuthenticationError('Youre not authenticated!');
@@ -34,10 +36,12 @@ export const createProductController = async (
       };
       throw new InputParsedError('Invalid data', errorField);
    }
-
+   productData.product_picture = '-';
    const createProduct = await createProductUseCase.execute(
       productData,
-      session.userId
+      session.userId,
+      additionalProductInfo,
+      additionalProductDocs
    );
 
    return createProduct;
