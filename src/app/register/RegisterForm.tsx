@@ -1,17 +1,15 @@
 'use client';
 import { HREF_LINK } from '@/constant/href-link';
-import { userRegisterSchema } from '@/lib/entities/models/user';
 import { Button } from '@nextui-org/button';
 import { Form } from '@nextui-org/form';
 import { Input } from '@nextui-org/input';
 import { Spacer } from '@nextui-org/spacer';
 import { CircleAlert, CircleCheck, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
-import { FormEvent, useActionState, useState } from 'react';
 import { registerUserCompany } from '../_actions/register';
-import { ValidationError } from 'next/dist/compiled/amphtml-validator';
 import { InputParsedError } from '@/lib/entities/error/common';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 const RegisterFormAccountSection = () => {
    const [passVisibility, setPassVisibility] = useState(false);

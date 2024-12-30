@@ -1,4 +1,4 @@
-import { InputParsedError, RegistrationError } from '../entities/error/common';
+import { InputParsedError } from '../entities/error/common';
 import {
    CompanyRegister,
    companyRegisterSchema,
@@ -20,8 +20,8 @@ export const registerUserController = async (
    userData: UserRegister,
    companyData: CompanyRegister
 ) => {
-   let userDataParsed = userRegisterSchema.safeParse(userData);
-   let companyDataParsed = companyRegisterSchema.safeParse(companyData);
+   const userDataParsed = userRegisterSchema.safeParse(userData);
+   const companyDataParsed = companyRegisterSchema.safeParse(companyData);
    if (userDataParsed.error || companyDataParsed.error) {
       const errorField = {
          ...userDataParsed.error?.flatten().fieldErrors,
@@ -29,7 +29,7 @@ export const registerUserController = async (
       };
       throw new InputParsedError('Invalid data', errorField);
    }
-   let create = await registerUserAndCompanyUseCase.execute(
+   const create = await registerUserAndCompanyUseCase.execute(
       userDataParsed.data,
       companyDataParsed.data
    );

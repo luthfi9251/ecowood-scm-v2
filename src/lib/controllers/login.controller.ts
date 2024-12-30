@@ -14,7 +14,7 @@ const loginSchema = z.object({
 });
 
 export const loginController = async (email: string, password: string) => {
-   let credentialParsed = loginSchema.safeParse({ email, password });
+   const credentialParsed = loginSchema.safeParse({ email, password });
 
    if (credentialParsed.error) {
       throw new InputParsedError(
@@ -23,7 +23,7 @@ export const loginController = async (email: string, password: string) => {
       );
    }
 
-   let sessionData = await loginUseCase.execute(
+   const sessionData = await loginUseCase.execute(
       credentialParsed.data.email,
       credentialParsed.data.password
    );

@@ -21,6 +21,11 @@ export class DataRetrievalError extends Error {
       super(message, options);
    }
 }
+export class OperationalError extends Error {
+   constructor(message: string, options?: ErrorOptions) {
+      super(message, options);
+   }
+}
 
 export class InputParsedError extends Error {
    fields: Record<string, string> | null;

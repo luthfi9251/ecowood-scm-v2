@@ -12,7 +12,7 @@ export class RegisterUserCompanyUseCase {
    ) {}
 
    async execute(userData: UserRegister, companyData: CompanyRegister) {
-      let emailDuplicateCheck = await this.userRepository.findByEmail(
+      const emailDuplicateCheck = await this.userRepository.findByEmail(
          userData.email
       );
       if (emailDuplicateCheck.length > 0) {
@@ -24,11 +24,11 @@ export class RegisterUserCompanyUseCase {
 
       // Ganti password yang diterima dengan password yang sudah di-hash
       const userWithHashedPassword = { ...userData, password: hashedPassword };
-      let userId = await this.userRepository.create(userWithHashedPassword);
+      const userId = await this.userRepository.create(userWithHashedPassword);
 
       //company check
 
-      let nameDuplicateCheck = await this.companyRepository.findByName(
+      const nameDuplicateCheck = await this.companyRepository.findByName(
          companyData.company_name
       );
       if (nameDuplicateCheck.length > 0) {
@@ -37,7 +37,10 @@ export class RegisterUserCompanyUseCase {
             'Company with this Name already registered!'
          );
       }
-      let companyId = await this.companyRepository.create(companyData, userId);
+      const companyId = await this.companyRepository.create(
+         companyData,
+         userId
+      );
 
       return { user: userId, company: companyId };
    }

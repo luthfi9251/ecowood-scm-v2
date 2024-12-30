@@ -1,8 +1,7 @@
 import { db } from '@/db';
-import { User, UserRegister } from '../entities/models/user';
+import { UserRegister } from '../entities/models/user';
 import { users } from '@/db/schema/user';
 import { v4 as uuidv4 } from 'uuid';
-import { MySqlQueryResultType } from 'drizzle-orm/mysql2';
 import { eq } from 'drizzle-orm';
 
 export class UserRepository {

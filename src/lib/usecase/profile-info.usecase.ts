@@ -1,10 +1,4 @@
-import bcrypt from 'bcryptjs';
-import {
-   DataRetrievalError,
-   RegistrationError,
-} from '../entities/error/common';
-import { CompanyRegister } from '../entities/models/company';
-import { UserRegister } from '../entities/models/user';
+import { DataRetrievalError } from '../entities/error/common';
 import { CompanyRepository } from '../repository/company.repository';
 import { UserRepository } from '../repository/user.repository';
 
@@ -15,13 +9,14 @@ export class ProfileInfoUseCase {
    ) {}
 
    async execute(userId: string) {
-      let [userProfile] = await this.userRepository.findById(userId);
+      const [userProfile] = await this.userRepository.findById(userId);
 
       if (!userProfile) {
          throw new DataRetrievalError('No user found!');
       }
 
-      let [companyProfile] = await this.companyRepository.findByUserId(userId);
+      const [companyProfile] =
+         await this.companyRepository.findByUserId(userId);
 
       if (!companyProfile) {
          throw new DataRetrievalError('No company data found!');

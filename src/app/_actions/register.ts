@@ -7,7 +7,6 @@ import {
 } from '@/lib/entities/error/common';
 import { CompanyRegister } from '@/lib/entities/models/company';
 import { UserRegister } from '@/lib/entities/models/user';
-import { revalidatePath } from 'next/cache';
 
 export const registerUserCompany = async (formData: FormData) => {
    try {
@@ -33,7 +32,7 @@ export const registerUserCompany = async (formData: FormData) => {
          company_fields: data.company_fields,
       } as CompanyRegister;
 
-      let res = await registerUserController(userData, companyData);
+      await registerUserController(userData, companyData);
       return { success: true, error: {} };
    } catch (err) {
       if (err instanceof RegistrationError) {

@@ -1,5 +1,6 @@
 'use client';
 
+import { createProduct } from '@/app/_actions/product';
 import { Button } from '@nextui-org/button';
 import { Form } from '@nextui-org/form';
 import { Input, Textarea } from '@nextui-org/input';
@@ -133,8 +134,18 @@ const ProductAdditionalInformation = ({
 };
 
 export default function ProductForm() {
+   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const data = new FormData(e.currentTarget);
+      const res = await createProduct(data);
+   };
+
    return (
-      <Form className="grid gap-2">
+      <Form
+         className="grid gap-2"
+         onSubmit={submitHandler}
+         // validationErrors={errors}
+      >
          <ProductCoreInformation />
          <ProductAdditionalInformation title="Additional Information" />
          <ProductAdditionalInformation
@@ -142,7 +153,10 @@ export default function ProductForm() {
             mode="document"
          />
          <Spacer />
-         <Button className="bg-ecowood-secondary w-[200px] mx-auto text-white">
+         <Button
+            type="submit"
+            className="bg-ecowood-secondary w-[200px] mx-auto text-white"
+         >
             Create
          </Button>
       </Form>
