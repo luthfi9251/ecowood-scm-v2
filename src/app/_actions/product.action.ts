@@ -1,10 +1,14 @@
 'use server';
 
+import { HREF_LINK } from '@/constant/href-link';
 import { createProductController } from '@/lib/controllers/product/create-product.controller';
+import { getProductController } from '@/lib/controllers/product/get-all-product.controller';
 import { InputParsedError } from '@/lib/entities/error/common';
-import { ProductCreate } from '@/lib/entities/models/product';
+import { ProductCreate } from '@/lib/schema/product.schema';
+
 import { getCurrentSession } from '@/lib/session';
 import { parseAdditionalInputValue } from '@/lib/utils';
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 export const createProduct = async (formData: FormData) => {
@@ -31,10 +35,40 @@ export const createProduct = async (formData: FormData) => {
          productData,
          sessionData.session,
          additionalInfo,
-         additionalDocs
+         additionalDocs as unknown as Record<string, File>[]
       );
-
+      revalidatePath(HREF_LINK.HILIR.PRODUCT.HOME);
       return { success: true, error: {} };
+   } catch (err) {
+      if (err instanceof InputParsedError) {
+         return {
+            success: false,
+            error: {
+               name: err.name,
+               message: err.message,
+               data: err.fields,
+            },
+         };
+      }
+      console.log(err);
+      return {
+         error: {
+            name: 'Error',
+            message: 'An error happened when creating product',
+         },
+      };
+   }
+};
+
+export const getAllProduct = async () => {
+   try {
+      const sessionData = await getCurrentSession();
+      if (!sessionData.session) {
+         redirect('/login');
+      }
+
+      const product = await getProductController(sessionData.session);
+      return { success: true, error: {}, data: product };
    } catch (err) {
       if (err instanceof InputParsedError) {
          return {

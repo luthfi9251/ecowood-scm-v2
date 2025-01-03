@@ -1,9 +1,10 @@
 import { productTable } from '@/db/schema/product';
-import { ProductCreate } from '../entities/models/product';
+import { Product, ProductTableData } from '../entities/models/product';
 import { db } from '@/db';
+import { eq, sql } from 'drizzle-orm';
 
 export class ProductRepository {
-   async create(productData: ProductCreate, companyId: string) {
+   async create(productData: Product, companyId: string) {
       return db.insert(productTable).values({
          product_name: productData.product_name,
          category: productData.category,
@@ -11,8 +12,26 @@ export class ProductRepository {
          product_picture: productData.product_picture,
          description: productData.description,
          company_id: companyId,
-         additional_info: productData.additional_info,
-         additional_docs: productData.additional_docs,
+         additional_info: productData.getAdditionalInfoString(),
+         additional_docs: productData.getAdditionalDocsString(),
       });
+   }
+
+   async getAllProduct(companyId: string): Promise<ProductTableData[]> {
+      let row = await db.execute(
+         sql`
+         SELECT 
+           p.product_name, 
+           p.product_picture, 
+           p.product_name, 
+           COUNT(b.id) as total_batch,
+           COUNT(s.id) as total_sc
+         FROM product p
+         LEFT JOIN supply_chain_product s ON s.product_id = p.id
+         LEFT JOIN batch_product b ON b.product_id = p.id
+         GROUP BY p.id
+       `
+      );
+      return row[0] as unknown as ProductTableData[];
    }
 }

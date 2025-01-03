@@ -1,12 +1,13 @@
 'use client';
 
-import { createProduct } from '@/app/_actions/product';
+import { createProduct } from '@/app/_actions/product.action';
 import { InputParsedError } from '@/lib/entities/error/common';
+import { cn } from '@/lib/utils';
 import { Button } from '@nextui-org/button';
 import { Form } from '@nextui-org/form';
 import { Input, Textarea } from '@nextui-org/input';
 import { Spacer } from '@nextui-org/spacer';
-import { Plus, Trash } from 'lucide-react';
+import { CircleAlert, CircleCheck, Plus, Trash } from 'lucide-react';
 import { useState } from 'react';
 
 const ProductCoreInformation = () => {
@@ -40,6 +41,7 @@ const ProductCoreInformation = () => {
             placeholder=" "
          />
          <Input
+            isRequired
             name="product_picture"
             label="Product Picture"
             labelPlacement="outside"
@@ -134,8 +136,34 @@ const ProductAdditionalInformation = ({
    );
 };
 
+const Message = ({
+   text,
+   mode,
+}: {
+   text: string;
+   mode: 'error' | 'success';
+}) => {
+   return (
+      <p
+         className={cn(
+            'w-full p-1 font-semibold text-white text-xs rounded-sm',
+            mode === 'error' ? 'bg-red-500' : 'bg-green-700'
+         )}
+      >
+         {mode === 'error' ? (
+            <CircleAlert size={18} className="inline-block mr-2" />
+         ) : (
+            <CircleCheck size={18} className="inline-block mr-2" />
+         )}
+         {text}
+      </p>
+   );
+};
+
 export default function ProductForm() {
    const [errors, setErrors] = useState({});
+   const [globalError, setGlobalError] = useState<string | null>(null);
+   const [successMessage, setSuccessMessage] = useState<string | null>(null);
    const [isPending, setIsPending] = useState(false);
    const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -145,7 +173,11 @@ export default function ProductForm() {
       if (!res.success) {
          if (res.error.name === InputParsedError.name) {
             setErrors(res.error.data!);
+         } else {
+            setGlobalError(res.error.message ?? null);
          }
+      } else {
+         setSuccessMessage('Your product created successfully');
       }
       setIsPending(false);
    };
@@ -163,6 +195,8 @@ export default function ProductForm() {
             mode="document"
          />
          <Spacer />
+         {globalError && <Message mode="error" text={globalError} />}
+         {successMessage && <Message mode="success" text={successMessage} />}
          <Button
             isLoading={isPending}
             type="submit"

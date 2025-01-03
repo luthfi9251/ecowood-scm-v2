@@ -1,28 +1,28 @@
-import { z } from 'zod';
+export class Product {
+   constructor(
+      id: number | undefined,
+      public product_name: string,
+      public unit: string,
+      public category: string,
+      public description: string,
+      public product_picture: string,
+      public company_id: string,
+      public additional_info?: Record<string, string>[],
+      public additional_docs?: Record<string, string>[]
+   ) {}
 
-export const productSchema = z.object({
-   id: z.string(),
-   product_name: z.string(),
-   unit: z.string(),
-   category: z.string(),
-   description: z.string(),
-   product_picture: z.string(),
-   company_id: z.string(),
-   additional_info: z.string().optional(),
-   additional_docs: z.string().optional(),
-});
-export type Product = z.infer<typeof productSchema>;
+   getAdditionalInfoString() {
+      return JSON.stringify(this.additional_info);
+   }
+   getAdditionalDocsString() {
+      return JSON.stringify(this.additional_docs);
+   }
+}
 
-export const productCreateSchema = productSchema
-   .pick({
-      product_name: true,
-      unit: true,
-      category: true,
-      description: true,
-      additional_info: true,
-      additional_docs: true,
-   })
-   .extend({
-      product_picture: z.instanceof(File).or(z.string()),
-   });
-export type ProductCreate = z.infer<typeof productCreateSchema>;
+export type ProductTableData = {
+   id: number;
+   product_name: string;
+   product_picture: string;
+   total_batch: number;
+   total_sc: number;
+};

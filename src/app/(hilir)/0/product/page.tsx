@@ -1,6 +1,7 @@
 import PageBase from '@/components/page-base';
 import ProductTable from './ProductTable';
 import { Card, CardBody, CardHeader } from '@nextui-org/card';
+import { getAllProduct } from '@/app/_actions/product.action';
 
 const breadcrumbs = [
    {
@@ -11,6 +12,8 @@ const breadcrumbs = [
 ];
 
 export default async function page() {
+   let dataProduct = await getAllProduct();
+
    return (
       <PageBase breadCrumbs={breadcrumbs}>
          <div className="p-4">
@@ -19,7 +22,7 @@ export default async function page() {
                   Product
                </CardHeader>
                <CardBody>
-                  <ProductTable />
+                  <ProductTable data={dataProduct.data ?? []} />
                </CardBody>
             </Card>
          </div>

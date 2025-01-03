@@ -3,26 +3,31 @@ import {
    AuthenticationError,
    InputParsedError,
 } from '@/lib/entities/error/common';
+
+import { CompanyRepository } from '@/lib/repository/company.repository';
+import { ProductRepository } from '@/lib/repository/product.repository';
 import {
    ProductCreate,
    productCreateSchema,
-} from '@/lib/entities/models/product';
-import { CompanyRepository } from '@/lib/repository/company.repository';
-import { ProductRepository } from '@/lib/repository/product.repository';
+} from '@/lib/schema/product.schema';
+import { LocalFileUploadService } from '@/lib/services/local-file-storage.service';
 import { CreateProductUseCase } from '@/lib/usecase/product/create-product.usecase';
 
 const productRepository = new ProductRepository();
 const companyRepository = new CompanyRepository();
+const fileUploadService = new LocalFileUploadService();
+
 const createProductUseCase = new CreateProductUseCase(
    productRepository,
-   companyRepository
+   companyRepository,
+   fileUploadService
 );
 
 export const createProductController = async (
    productData: ProductCreate,
    session: Session,
    additionalProductInfo?: Record<string, string>[],
-   additionalProductDocs?: Record<string, string>[]
+   additionalProductDocs?: Record<string, File>[]
 ) => {
    if (!session) {
       throw new AuthenticationError('Youre not authenticated!');
@@ -36,7 +41,7 @@ export const createProductController = async (
       };
       throw new InputParsedError('Invalid data', errorField);
    }
-   productData.product_picture = '-';
+
    const createProduct = await createProductUseCase.execute(
       productData,
       session.userId,
