@@ -3,7 +3,11 @@
 import { HREF_LINK } from '@/constant/href-link';
 import { createProductController } from '@/lib/controllers/product/create-product.controller';
 import { getProductController } from '@/lib/controllers/product/get-all-product.controller';
-import { InputParsedError } from '@/lib/entities/error/common';
+import { getByIDProductController } from '@/lib/controllers/product/get-by-id-product.controller';
+import {
+   InputParsedError,
+   OperationalError,
+} from '@/lib/entities/error/common';
 import { ProductCreate } from '@/lib/schema/product.schema';
 
 import { getCurrentSession } from '@/lib/session';
@@ -39,7 +43,8 @@ export const createProduct = async (formData: FormData) => {
       );
       revalidatePath(HREF_LINK.HILIR.PRODUCT.HOME);
       return { success: true, error: {} };
-   } catch (err) {
+   } catch (err: any) {
+      if (err.message === 'NEXT_REDIRECT') throw err;
       if (err instanceof InputParsedError) {
          return {
             success: false,
@@ -69,7 +74,8 @@ export const getAllProduct = async () => {
 
       const product = await getProductController(sessionData.session);
       return { success: true, error: {}, data: product };
-   } catch (err) {
+   } catch (err: any) {
+      if (err.message === 'NEXT_REDIRECT') throw err;
       if (err instanceof InputParsedError) {
          return {
             success: false,
@@ -82,9 +88,44 @@ export const getAllProduct = async () => {
       }
       console.log(err);
       return {
+         success: false,
          error: {
             name: 'Error',
-            message: 'An error happened when creating product',
+            message: 'An error happened when get All product',
+         },
+      };
+   }
+};
+
+export const getByIDProduct = async (productId: number) => {
+   try {
+      const sessionData = await getCurrentSession();
+      if (!sessionData.session) {
+         redirect('/login');
+      }
+
+      const product = await getByIDProductController(
+         sessionData.session,
+         productId
+      );
+      return { success: true, error: {}, data: product };
+   } catch (err: any) {
+      if (err.message === 'NEXT_REDIRECT') throw err;
+      if (err instanceof OperationalError) {
+         return {
+            success: false,
+            error: {
+               name: err.name,
+               message: err.message,
+            },
+         };
+      }
+      console.log(err);
+      return {
+         success: false,
+         error: {
+            name: 'Error',
+            message: 'An error happened when get product detail',
          },
       };
    }

@@ -1,9 +1,7 @@
 'use client';
 import { HREF_LINK } from '@/constant/href-link';
-import { ProductTableData } from '@/lib/entities/models/product';
 import { Button } from '@nextui-org/button';
 import { Input } from '@nextui-org/input';
-
 import {
    Table,
    TableBody,
@@ -11,60 +9,40 @@ import {
    TableColumn,
    TableHeader,
    TableRow,
-   getKeyValue,
 } from '@nextui-org/table';
 import { Info, Pencil, Plus, SearchIcon } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
-
-const data = [
-   {
-      id: 1,
-      picture: '/biochar.jpg',
-      product_name: 'Biochar AgrooBoost',
-      id_sc: 1,
-      id_batch: 3,
-   },
-];
 
 const columns = [
    {
       name: 'No',
       uid: 'no',
-      render: (row: ProductTableData, index: number) => index + 1,
+      render: (row: any, index: number) => index + 1,
    },
    {
-      name: 'Product Picture',
-      uid: 'product_picture',
-      render: (row: ProductTableData) => (
-         <Image
-            src={row.product_picture}
-            alt={row.product_name}
-            width={150}
-            height={150}
-            className="aspect-square object-contain bg-slate-200/50 p-1"
-         />
-      ),
+      name: 'Batch Code',
+      uid: 'batch_code',
+      render: (row: any) => row.sc_name,
    },
    {
-      name: 'Product Name',
-      uid: 'product_name',
-      render: (row: ProductTableData) => row.product_name,
+      name: 'Supply Chain',
+      uid: 'sc_name',
+      render: (row: any) => row.total_company,
    },
    {
-      name: 'Total SC',
-      uid: 'total_sc',
-      render: (row: ProductTableData) => row.total_sc,
+      name: 'Production Capacity',
+      uid: 'production_capacity',
+      render: (row: any) => row.status,
    },
    {
-      name: 'Total Batch',
-      uid: 'total_batch',
-      render: (row: ProductTableData) => row.total_batch,
+      name: 'Status',
+      uid: 'status',
+      render: (row: any) => row.status,
    },
    {
       name: 'Action',
       uid: 'action',
-      render: (row: ProductTableData) => (
+      render: (row: any) => (
          <div className="flex items-center gap-1 ">
             <Button
                startContent={<Info size={20} />}
@@ -72,7 +50,7 @@ const columns = [
                variant="light"
                as={Link}
                href={HREF_LINK.HILIR.PRODUCT.DETAIL(row.id)}
-               className="bg-ecowood-platinum text-jet"
+               className="text-jet"
             ></Button>
             <Button
                startContent={<Pencil size={17} />}
@@ -80,14 +58,23 @@ const columns = [
                variant="light"
                as={Link}
                href={HREF_LINK.HILIR.PRODUCT.DETAIL(row.id)}
-               className="bg-ecowood-platinum text-jet"
+               className="text-jet"
             ></Button>
          </div>
       ),
    },
 ];
 
-export default function ProductTable({ data }: { data: ProductTableData[] }) {
+const data = [
+   {
+      id: 1,
+      sc_name: '/biochar.jpg',
+      total_company: 'Biochar AgrooBoost',
+      status: 1,
+   },
+];
+
+export default function BatchTable({}) {
    return (
       <div className=" grid gap-5">
          <div className="flex justify-between gap-3 items-end">
@@ -104,7 +91,7 @@ export default function ProductTable({ data }: { data: ProductTableData[] }) {
                as={Link}
                href={HREF_LINK.HILIR.PRODUCT.CREATE}
             >
-               Add Product
+               Add Batch
             </Button>
          </div>
          <Table

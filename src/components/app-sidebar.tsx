@@ -30,6 +30,7 @@ import {
    SidebarFooter,
    SidebarHeader,
    SidebarRail,
+   useSidebar,
 } from '@/components/ui/sidebar';
 import { HREF_LINK } from '@/constant/href-link';
 import Link from 'next/link';
@@ -39,6 +40,7 @@ import { Spacer } from '@nextui-org/spacer';
 import { Session } from '@/db/schema/session';
 import { User } from '@/lib/entities/models/user';
 import { Company } from '@/lib/entities/models/company';
+import { cn } from '@/lib/utils';
 
 // This is sample data.
 const data = {
@@ -213,10 +215,19 @@ const navUtilityData = [
 ];
 
 const SidebarLogo = () => {
+   const { isMobile, state } = useSidebar();
    return (
       <Link href="/" className="flex items-center gap-3">
          <Image src={EcowoodLogo} width={40} height={40} alt="Ecowood Logo" />
-         <p className="text-black font-bold">Ecowood SCM</p>
+         <p
+            suppressHydrationWarning
+            className={
+               (cn('text-black font-bold'),
+               state === 'collapsed' || isMobile ? 'hidden' : '')
+            }
+         >
+            Ecowood SCM
+         </p>
       </Link>
    );
 };
