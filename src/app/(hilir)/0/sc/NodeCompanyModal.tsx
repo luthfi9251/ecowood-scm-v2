@@ -1,82 +1,104 @@
 'use client';
-import { Button } from '@nextui-org/button';
-import { Card, CardBody, CardFooter, CardHeader } from '@nextui-org/card';
-import { Form } from '@nextui-org/form';
+
 import {
-   Modal,
-   ModalContent,
-   ModalHeader,
-   ModalBody,
-   ModalFooter,
-   useDisclosure,
-} from '@nextui-org/modal';
-import {
-   Background,
-   BackgroundVariant,
-   Controls,
-   ReactFlow,
-} from '@xyflow/react';
-import {
-   Autocomplete,
-   AutocompleteSection,
-   AutocompleteItem,
-} from '@nextui-org/autocomplete';
-import '@xyflow/react/dist/style.css';
-import { Info, Pencil, Trash2 } from 'lucide-react';
-import Image from 'next/image';
-import { Input } from '@nextui-org/input';
-import { Select, SelectItem } from '@nextui-org/select';
+   Key,
+   useCallback,
+   useContext,
+   useEffect,
+   useMemo,
+   useState,
+} from 'react';
 import {
    CompanyNodeInfoType,
    CompanySelectionType,
    useCreateSCStore,
-} from '../useCreateStore';
-import { Key, useCallback, useMemo, useState } from 'react';
-import Flow from '@/components/supply-chain-flow/Flow';
+} from './create/useCreateStore';
+import {
+   Modal,
+   ModalBody,
+   ModalContent,
+   ModalFooter,
+   ModalHeader,
+} from '@nextui-org/modal';
+import { Form } from '@nextui-org/form';
+import { Autocomplete, AutocompleteItem } from '@nextui-org/autocomplete';
+import { Input } from '@nextui-org/input';
+import { Info } from 'lucide-react';
+import { Select, SelectItem } from '@nextui-org/select';
+import { Button } from '@nextui-org/button';
+import {
+   CompanyNodeType,
+   SCCreateContext,
+} from './create/CreatePageContextProvider';
+import useRandomId from '@/hooks/use-random-id';
 
-const NodeCompanyModal = ({
+type FormSupply = {
+   outcomeMaterial: string;
+   requestedMaterial: string;
+   suppliedByCompanyId?: string;
+   suppliedToCompanyId?: string;
+   isInvite: boolean;
+};
+
+export default function NodeCompanyModal({
    isOpen,
    onOpenChange,
+   onSubmitHandler,
+   formValueDefault,
+   formSupplyDefault,
+   isDisabled = false,
 }: {
    isOpen: boolean;
    onOpenChange: (isOpen: boolean) => void;
-}) => {
-   const companyList: CompanySelectionType[] = useCreateSCStore(
-      (state) => state.company_list
-   );
-   const companyNodeList = useCreateSCStore((state) => state.companyNodeList);
-   const addCompanyNodeList = useCreateSCStore(
-      (state) => state.addCompanyNodeList
-   );
-
-   const [formValue, setFormValue] = useState<CompanySelectionType>({
-      id: '',
-      company_email: '',
-      city: '',
-      address: '',
-      company_fields: '',
-      company_name: '',
-      company_picture: '',
-   });
-
-   const [formIsDisabled, setFormIsDisabled] = useState(false);
-   const [isInviteCompany, setIsInviteCompany] = useState(false);
-   const [formSupplyValue, setFormSupplyValue] = useState({
-      outcomeMaterial: '',
-      requestedMaterial: '',
-      suppliedByCompanyId: '',
-      suppliedToCompanyId: '',
-      isInvite: false,
-   });
-
-   const selectSuppliedCompanyList = useMemo(
-      () =>
-         companyNodeList.map((item) => ({
-            id_company: item.information.id,
-            company_name: item.information.company_name,
-         })),
+   onSubmitHandler?: (
+      dataNode: CompanyNodeType,
+      dataCompany?: CompanySelectionType
+   ) => void;
+   formValueDefault?: CompanySelectionType;
+   formSupplyDefault?: FormSupply;
+   isDisabled?: boolean;
+}) {
+   const { companyList, companyNodeList } = useContext(SCCreateContext);
+   const companyNodeIdList = useMemo(
+      () => companyNodeList.map((item) => item.companyId),
       [companyNodeList]
    );
+   const companyId = useRandomId();
+   const [formValue, setFormValue] = useState<CompanySelectionType>({
+      id: formValueDefault?.id ?? '',
+      company_email: formValueDefault?.company_email ?? '',
+      city: formValueDefault?.city ?? '',
+      address: formValueDefault?.address ?? '',
+      company_fields: formValueDefault?.company_fields ?? '',
+      company_name: formValueDefault?.company_name ?? '',
+      company_picture: formValueDefault?.company_picture ?? '',
+   });
+   const [formIsDisabled, setFormIsDisabled] = useState(isDisabled);
+   const [formSupplyValue, setFormSupplyValue] = useState({
+      outcomeMaterial: formSupplyDefault?.outcomeMaterial ?? '',
+      requestedMaterial: formSupplyDefault?.requestedMaterial ?? '',
+      suppliedByCompanyId: formSupplyDefault?.suppliedByCompanyId ?? '',
+      suppliedToCompanyId: formSupplyDefault?.suppliedToCompanyId ?? '',
+      isInvite: formSupplyDefault?.isInvite ?? false,
+   });
+
+   const filteredCompanyList = useMemo(
+      () => companyList.filter((item) => !companyNodeIdList.includes(item.id)),
+      [companyNodeList, companyList]
+   );
+
+   const selectSuppliedCompanyList = useMemo(() => {
+      let mapped = companyNodeList.map((item) => {
+         let findCompanyData = companyList.find(
+            (item2) => item2.id === item.companyId
+         );
+         return {
+            company_id: findCompanyData?.id,
+            company_name: findCompanyData?.company_name,
+         };
+      });
+      return mapped.filter((item) => item.company_id !== formValue.id);
+   }, [companyNodeList, formValue.id]);
 
    const companySelectionChange = useCallback(
       (key: Key | null) => {
@@ -92,6 +114,7 @@ const NodeCompanyModal = ({
       },
       [companyList]
    );
+
    const companyInputChange = useCallback(
       (value: string) => {
          setTimeout(() => {
@@ -118,10 +141,44 @@ const NodeCompanyModal = ({
       },
       [companyList]
    );
+
    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
+      if (onSubmitHandler) {
+         onSubmitHandler(
+            {
+               id: '',
+               isInvite: formSupplyValue.isInvite,
+               outcomeMaterial: formSupplyValue.outcomeMaterial,
+               requestedMaterial: formSupplyValue.requestedMaterial,
+               suppliedByCompanyId: formSupplyValue.suppliedByCompanyId,
+               suppliedToCompanyId: formSupplyValue.suppliedToCompanyId,
+               companyId: formSupplyValue.isInvite ? companyId : formValue.id,
+            },
+            {
+               ...formValue,
+               id: formSupplyValue.isInvite ? companyId : formValue.id,
+            }
+         );
+      }
 
-      console.log({ formValue, formSupplyValue });
+      setFormValue({
+         id: '',
+         company_email: '',
+         city: '',
+         address: '',
+         company_fields: '',
+         company_name: '',
+         company_picture: '',
+      });
+      setFormSupplyValue({
+         outcomeMaterial: '',
+         requestedMaterial: '',
+         suppliedByCompanyId: '',
+         suppliedToCompanyId: '',
+         isInvite: false,
+      });
+      onOpenChange(false);
    };
 
    return (
@@ -143,7 +200,7 @@ const NodeCompanyModal = ({
                               className=""
                               label="Company Name"
                               labelPlacement="outside"
-                              defaultItems={companyList}
+                              defaultItems={filteredCompanyList}
                               onSelectionChange={companySelectionChange}
                               onInputChange={companyInputChange}
                               allowsCustomValue
@@ -263,7 +320,9 @@ const NodeCompanyModal = ({
                               variant="bordered"
                               items={selectSuppliedCompanyList}
                               placeholder=" "
-                              selectedKeys={formSupplyValue.suppliedByCompanyId}
+                              selectedKeys={[
+                                 formSupplyValue.suppliedByCompanyId,
+                              ]}
                               onSelectionChange={(val) =>
                                  setFormSupplyValue((state) => ({
                                     ...state,
@@ -272,7 +331,7 @@ const NodeCompanyModal = ({
                               }
                            >
                               {(comp) => (
-                                 <SelectItem key={comp.id_company}>
+                                 <SelectItem key={comp.company_id}>
                                     {comp.company_name}
                                  </SelectItem>
                               )}
@@ -299,7 +358,9 @@ const NodeCompanyModal = ({
                               variant="bordered"
                               placeholder=" "
                               items={selectSuppliedCompanyList}
-                              selectedKeys={formSupplyValue.suppliedToCompanyId}
+                              selectedKeys={[
+                                 formSupplyValue.suppliedToCompanyId,
+                              ]}
                               onSelectionChange={(val) =>
                                  setFormSupplyValue((state) => ({
                                     ...state,
@@ -308,7 +369,7 @@ const NodeCompanyModal = ({
                               }
                            >
                               {(comp) => (
-                                 <SelectItem key={comp.id_company}>
+                                 <SelectItem key={comp.company_id}>
                                     {comp.company_name}
                                  </SelectItem>
                               )}
@@ -335,107 +396,5 @@ const NodeCompanyModal = ({
             )}
          </ModalContent>
       </Modal>
-   );
-};
-
-const NodeCompanyItem = ({
-   companyData,
-}: {
-   companyData: CompanyNodeInfoType;
-}) => {
-   return (
-      <div className="flex w-full gap-3 border-y-1 py-3 px-3 cursor-default">
-         <p className="self-center font-bold">1</p>
-         <Image
-            src={companyData.information.company_picture}
-            alt="Company Logo"
-            width={50}
-            height={50}
-            className="aspect-square object-cover rounded-[50%] self-center"
-         />
-         <div className="grow">
-            <h4 className="font-semibold">
-               {companyData.information.company_name}
-            </h4>
-            <table className="text-xs">
-               <tbody>
-                  <tr>
-                     <td>Input</td>
-                     <td>:</td>
-                     <td>
-                        {companyData.requestedMaterial} -{' '}
-                        {companyData.suppliedByCompanyId}
-                     </td>
-                  </tr>
-                  <tr>
-                     <td>Output</td>
-                     <td>:</td>
-                     <td>{companyData.suppliedToCompanyId}</td>
-                  </tr>
-               </tbody>
-            </table>
-         </div>
-         <div className="self-center justify-self-end flex gap-2">
-            <Button
-               className="bg-sky-700 text-white"
-               size="sm"
-               startContent={<Pencil size={17} />}
-               isIconOnly
-            ></Button>
-            <Button
-               className="bg-rose-700 text-white"
-               size="sm"
-               startContent={<Trash2 size={17} />}
-               isIconOnly
-            ></Button>
-         </div>
-      </div>
-   );
-};
-
-const NodeCompanySection = () => {
-   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-   const companyNodeList = useCreateSCStore((state) => state.companyNodeList);
-   return (
-      <>
-         <Card radius="sm">
-            <CardHeader>Company List</CardHeader>
-            <CardBody className="px-0">
-               <div className="grid grid-cols-1 overflow-y-auto max-h-[700px]">
-                  {companyNodeList.map((item, idx) => (
-                     <NodeCompanyItem key={idx} companyData={item} />
-                  ))}
-               </div>
-            </CardBody>
-            <CardFooter>
-               <Button
-                  className="w-full bg-ecowood-secondary text-white"
-                  radius="sm"
-                  onPress={onOpenChange}
-               >
-                  Add Company
-               </Button>
-            </CardFooter>
-         </Card>
-         <NodeCompanyModal isOpen={isOpen} onOpenChange={onOpenChange} />
-      </>
-   );
-};
-
-const initialNodes = [
-   { id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
-   { id: '2', position: { x: 0, y: 100 }, data: { label: '2' } },
-];
-const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
-
-export default function FlowWrapper() {
-   return (
-      <div
-         style={{ width: '100%' }}
-         className="grid grid-cols-1 xl:grid-cols-3 gap-3"
-      >
-         <Flow className="xl:col-span-2 min-h-[500px]" />
-         <NodeCompanySection />
-      </div>
    );
 }

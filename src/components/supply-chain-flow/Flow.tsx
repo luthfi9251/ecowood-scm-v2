@@ -79,13 +79,26 @@ const nodeTypes = {
 };
 
 export default function Flow({ className }: { className?: string }) {
-   const nodesInitial = useSCFlowStore((state) => state.nodes);
-   const edgesInitial = useSCFlowStore((state) => state.edges);
+   // const nodes = useSCFlowStore((state) => state.nodes);
+   // const edges = useSCFlowStore((state) => state.edges);
+
+   const [nodes, setNodes] = useState(initialNodes);
+   const [edges, setEdges] = useState(initialEdges);
+   const onNodesChange = useCallback(
+      (changes: any) => setNodes((nds) => applyNodeChanges(changes, nds)),
+      []
+   );
+   const onEdgesChange = useCallback(
+      (changes: any) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+      []
+   );
 
    return (
       <ReactFlow
-         defaultNodes={nodesInitial}
-         defaultEdges={edgesInitial}
+         nodes={nodes}
+         edges={edges}
+         onNodesChange={onNodesChange}
+         onEdgesChange={onEdgesChange}
          nodeTypes={nodeTypes}
          fitView
          className={cn(className)}
